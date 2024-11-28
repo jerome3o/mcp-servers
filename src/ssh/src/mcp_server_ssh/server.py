@@ -194,7 +194,7 @@ Examples:
                     SESSIONS[session_id] = conn
                     return [TextContent(type="text", text=f"Connected to {host}\nSession ID: {session_id}")]
                 else:
-                    await conn.close()
+                    conn.close()  # Non-awaited close for non-kept connections
                     return [TextContent(type="text", text=f"Connected to {host} and closed connection")]
 
             elif command_type == CommandType.EXEC:
@@ -229,11 +229,20 @@ Examples:
                 if session_id not in SESSIONS:
                     raise McpError(INVALID_PARAMS, f"No active session found for ID: {session_id}")
 
-                conn = SESSIONS[session_id]
-                await conn.close()
-                del SESSIONS[session_id]
-
-                return [TextContent(type="text", text=f"Disconnected session: {session_id}")]
+                try:
+                    conn = SESSIONS[session_id]
+                    # First remove from sessions dict to prevent any new commands
+                    del SESSIONS[session_id]
+                    # Then close the connection without awaiting
+                    conn.close()
+                    logger.debug(f"Successfully closed session {session_id}")
+                    return [TextContent(type="text", text=f"Disconnected session: {session_id}")]
+                except Exception as e:
+                    logger.error(f"Error closing session {session_id}: {str(e)}")
+                    # If we failed to close properly, don't keep it in active sessions
+                    if session_id in SESSIONS:
+                        del SESSIONS[session_id]
+                    raise McpError(INVALID_PARAMS, f"Error closing session: {str(e)}")
 
             elif command_type == CommandType.LIST:
                 if not SESSIONS:
