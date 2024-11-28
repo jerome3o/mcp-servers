@@ -1,0 +1,17 @@
+[project]
+name = "mcp-server-ssh"
+version = "0.1.0"
+description = "MCP SSH Server for managing persistent SSH connections"
+dependencies = [
+    "mcp",
+    "asyncssh",  # For async SSH support
+    "pydantic",  # For input validation
+    "aiofiles",  # For async file operations
+]
+
+[project.scripts]
+mcp-server-ssh = "mcp_server_ssh.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

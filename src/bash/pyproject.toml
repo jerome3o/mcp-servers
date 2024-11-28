@@ -1,0 +1,16 @@
+[project]
+name = "mcp-server-bash"
+version = "0.1.0"
+description = "MCP server for executing bash commands"
+dependencies = [
+    "mcp",
+    "aiofiles",
+    "pydantic"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+mcp-server-bash = "mcp_server_bash.server:main"
