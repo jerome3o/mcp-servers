@@ -149,17 +149,6 @@ Examples:
 
         return [TextContent(type="text", text=output if output else "No output")]
 
-    @server.get_prompt()
-    async def get_prompt(name: str, arguments: dict | None) -> GetPromptResult:
-        if not arguments:
-            raise McpError(INVALID_PARAMS, "Arguments required")
-
-        result = await call_tool(name, arguments)
-        return GetPromptResult(
-            description="Python Code Execution Result",
-            messages=[PromptMessage(role="user", content=result[0])]
-        )
-
     options = server.create_initialization_options()
     async with stdio_server() as (read_stream, write_stream):
         await server.run(read_stream, write_stream, options, raise_exceptions=True)

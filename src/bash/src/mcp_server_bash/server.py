@@ -64,10 +64,10 @@ async def run_background_process(command: str, process_id: str):
     try:
         await log_output(process_id, "Starting background process...")
         await log_output(process_id, f"Command: {command}")
-        
+
         # Wrap command to set working directory
         wrapped_command = f'cd /home/jerome && {command}'
-        
+
         process = await asyncio.create_subprocess_shell(
             wrapped_command,
             stdout=asyncio.subprocess.PIPE,
@@ -75,16 +75,16 @@ async def run_background_process(command: str, process_id: str):
             env=get_environment(),
             shell=True
         )
-        
+
         stdout, stderr = await process.communicate()
-        
+
         if stdout:
             await log_output(process_id, f"Output: {stdout.decode()}")
         if stderr:
             await log_output(process_id, f"Error: {stderr.decode()}")
-            
+
         await log_output(process_id, f"Process exited with code: {process.returncode}")
-            
+
     except Exception as e:
         await log_output(process_id, f"Error: {str(e)}")
     finally:
@@ -94,7 +94,7 @@ async def run_background_process(command: str, process_id: str):
 async def execute_bash(command: str) -> tuple[str, str, int]:
     # Wrap command to set working directory
     wrapped_command = f'cd /home/jerome && {command}'
-    
+
     process = await asyncio.create_subprocess_shell(
         wrapped_command,
         stdout=asyncio.subprocess.PIPE,
@@ -102,7 +102,7 @@ async def execute_bash(command: str) -> tuple[str, str, int]:
         env=get_environment(),
         shell=True
     )
-    
+
     stdout, stderr = await process.communicate()
     return stdout.decode(), stderr.decode(), process.returncode
 
@@ -167,19 +167,8 @@ Examples:
         if stderr:
             output += f"Errors:\n{stderr}"
         output += f"Exit code: {returncode}"
-        
+
         return [TextContent(type="text", text=output if output else "No output")]
-
-    @server.get_prompt()
-    async def get_prompt(name: str, arguments: dict | None) -> GetPromptResult:
-        if not arguments:
-            raise McpError(INVALID_PARAMS, "Arguments required")
-
-        result = await call_tool(name, arguments)
-        return GetPromptResult(
-            description="Bash Command Execution Result",
-            messages=[PromptMessage(role="user", content=result[0])]
-        )
 
     try:
         logger.info("Initializing server...")
@@ -198,7 +187,7 @@ def main():
             import msvcrt
             msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
             msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-        
+
         logger.info("Starting main function...")
         asyncio.run(serve())
     except Exception as e:
